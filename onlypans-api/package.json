@@ -1,0 +1,19 @@
+{
+  "name": "onlypans-api",
+  "version": "1.0.0",
+  "description": "API for onlypans",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "nodemon -r dotenv/config ."
+  },
+  "author": "Denis Kartachov",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.1"
+  },
+  "devDependencies": {
+    "dotenv": "^16.0.1",
+    "nodemon": "^2.0.16"
+  }
+}
