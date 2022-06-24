@@ -4,7 +4,7 @@ import Post from "../components/Post";
 
 const PostDetail = ({ route }) => {
   const { post, image } = route.params;
-
+  
   return (
     <View style={styles.container}>
       <Post post={post} image={image} />

@@ -1,30 +1,25 @@
 import express, { Router } from 'express';
 import posts from './routes/posts.js';
+import auth from './routes/auth.js';
+import login from './routes/login.js';
 
 const app = express();
 const router = Router();
 const port = process.env.PORT;
 
-router.use('/posts', posts);
+const endpointHit = (req, res, next) => {
+  console.log(`${req.originalUrl} endpoint hit`);
+  next();
+}
 
-router.get('/', async (req, res) => {
-  res.status(200).json({
-    api: {
-      name: 'onlypans-api',
-      status: 'healthy',
-      version: '1.0.0',
-    },
-    routes: [
-      {
-        endpoint: '/posts',
-      },
-    ]
-  });
-});
+router.use('/posts', posts);
+router.use('/login', login);
 
 app.use(express.json());
-
-app.use('/api/v1', router);
+app.use('/api/v1', (req, res, next) => {
+  console.log(`${req.originalUrl} endpoint hit`);
+  next();
+}, router);
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}...`);

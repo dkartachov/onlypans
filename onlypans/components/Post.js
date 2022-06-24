@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect, memo } from "react";
 import { StyleSheet, View, Text, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import ActionButton from "./ActionButton";
+import env from "../env";
 
 const colors = {
   green: 'green',
@@ -9,19 +10,41 @@ const colors = {
   black: 'black',
 };
 
-const Post = ({ post, image, onVotePost }) => {
+const Post = ({ post, image }) => {
   const [vote, setVote] = useState(post.vote || null);
+
+  const updateVote = async (vote) => {
+    const res = await fetch(`${env.ONLYPANS_API_URL}/posts/${post.id}/vote`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        vote,
+      }),
+    });
+
+    if (res.status !== 200) {
+      console.error(`Error updating vote for post ${post.id}`);
+    }
+  }
+
+  const onVotePost = (id, vote) => {
+    console.log(`post id ${id} vote: ${vote}`);
+  }
 
   const handleVote = (value) => {
     if ((vote === 'up' && value === 'up') || (vote === 'down' && value === 'down')) {
       onVotePost(post.id, null);
       setVote(null);
+      updateVote('');
 
       return;
     }
 
     onVotePost(post.id, value);
     setVote(value);
+    updateVote(value);
   }
 
   return (
