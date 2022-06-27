@@ -4,6 +4,7 @@ import { View, Text, ActivityIndicator } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { UserContext } from './components/Context';
 import Feed from './screens/Feed';
+import Home from './screens/Home';
 import PostDetail from './screens/PostDetail';
 import Login from './screens/Login';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -19,6 +20,7 @@ const App = () => {
           ...prevState,
           loading: false,
           user: action.user,
+          userId: action.userId,
           accessToken: action.accessToken
         }
       case 'LOGOUT':
@@ -26,6 +28,7 @@ const App = () => {
           ...prevState,
           loading: false,
           user: null,
+          userId: null,
           accessToken: null
         }
       case 'SIGNUP':
@@ -33,6 +36,7 @@ const App = () => {
           ...prevState,
           loading: false,
           user: action.user,
+          userId: action.userId,
           accessToken: action.accessToken
         }
     }
@@ -41,23 +45,25 @@ const App = () => {
   const [loginState, dispatch] = useReducer(loginReducer, {
     loading: true,
     user: null,
+    userId: null,
     accessToken: null
   });
 
   const userContext = {
-    login: (username, accessToken) => {
-      dispatch({ type: 'LOGIN', user: username, accessToken })
+    login: (user, userId, accessToken) => {
+      dispatch({ type: 'LOGIN', user, userId, accessToken })
     },
-    logout: () => dispatch({ type: 'LOGOUT', user: null, accessToken: null })
+    logout: () => dispatch({ type: 'LOGOUT', user: null, userId: null, accessToken: null })
   }
 
   useEffect(() => {
     const lazyLoad = setTimeout(() => {
       AsyncStorage.getItem('accessToken')
         .then(accessToken => {
-          const username = accessToken && jwtDecode(accessToken).username;
+          const decodedToken = accessToken && jwtDecode(accessToken);
+          const { user, userId } = decodedToken || {};
 
-          userContext.login(username, accessToken);
+          userContext.login(user, userId, accessToken);
         })
         .catch(error => console.error(error));
     }, 500);
@@ -79,16 +85,17 @@ const App = () => {
     );
   else
     return (
-      <UserContext.Provider value={{ login: userContext.login, logout: userContext.logout }}>
+      <UserContext.Provider value={{ loginState, login: userContext.login, logout: userContext.logout }}>
         <NavigationContainer>
           <Stack.Navigator>
             {loginState.accessToken ? (
               <>
                 <Stack.Screen 
                   name='Home' 
-                  component={Feed}
+                  component={Home}
                   options={{
                     title: 'Home',
+                    headerShown: false,
                     headerStyle: {
                       backgroundColor: 'white',
                     },

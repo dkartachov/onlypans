@@ -3,8 +3,9 @@ import { StyleSheet, View, Text, Keyboard, SafeAreaView, TextInput, TouchableOpa
 import { UserContext } from '../components/Context';
 import env from '../env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import jwtDecode from 'jwt-decode';
 
-const Login = ({ navigation }) => {
+const Login = () => {
   const [username, setUsername] = useState(null);
   const [password, setPassword] = useState(null);
 
@@ -19,7 +20,7 @@ const Login = ({ navigation }) => {
       return;
     }
 
-    const res = await fetch(`${env.ONLYPANS_API_URL}/login`, {
+    const res = await fetch(`${env.ONLYPANS_API_URL}/api/v1/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -27,20 +28,31 @@ const Login = ({ navigation }) => {
       body: JSON.stringify({ username, password })
     });
 
-    if (res.status !== 200) {
-      setUsername(null);
-      setPassword(null);
+    switch (res.status) {
+      case 200:
+        const { accessToken } = await res.json();
 
-      console.log('wrong credentials');
+        await AsyncStorage.setItem('accessToken', accessToken);
 
-      return;
+        const userId = jwtDecode(accessToken).userId
+  
+        login(username, userId, accessToken);
+
+        break;
+      case 403:
+        setPassword(null);
+
+        console.log('Incorrect password');
+
+        break;
+      case 404:
+        setUsername(null);
+        setPassword(null);
+  
+        console.log('User not found');
+
+        break;
     }
-
-    const { accessToken } = await res.json();
-
-    await AsyncStorage.setItem('accessToken', accessToken);
-
-    login(username, accessToken);
   }
 
   return (

@@ -1,0 +1,20 @@
+const MESSAGE = {
+  NOT_FOUND: (resource, value) => ({
+    message: `${resource} not found`,
+    reason: `${resource} with id ${value} does not exist`
+  }),
+  INVALID_PARAMETER: (parameter, name, type) => ({
+    message: `Invalid parameter '${parameter}'`,
+    reason: `Parameter '${name}' must be of type '${type}'`
+  }),
+  INVALID_QUERY_PARAMETER: (parameter, name, type) => ({
+    message: `Invalid query parameter '${parameter}'`,
+    reason: `Query parameter '${name}' must be of type '${type}'`
+  }),
+  CUSTOM: (message, reason = '') => ({
+    message,
+    reason
+  })
+}
+
+export default MESSAGE;

@@ -3,8 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity, Image } from "react-native";
 import Post from "./Post";
 import { useNavigation } from '@react-navigation/native';
 
-const PostFeed = ({ post, image, onPress, onVotePost }) => {
-
+const PostFeed = ({ post, image }) => {
   const navigation = useNavigation();
 
   const handleOnPress = () => navigation.navigate('PostDetail', { post, image });
@@ -15,7 +14,7 @@ const PostFeed = ({ post, image, onPress, onVotePost }) => {
     delayPressIn={20}
     onPress={handleOnPress}
   >
-    <Post post={post} image={image} onVotePost={onVotePost} />
+    <Post post={post} image={image} />
     <View style={styles.horizontalLine}/>
   </TouchableOpacity>
   );

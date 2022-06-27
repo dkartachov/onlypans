@@ -6,32 +6,29 @@ import PostFeed from '../components/PostFeed';
 import env from '../env';
 import { UserContext } from '../components/Context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native';
 
 const renderItem = ({ item }) => (
   <PostFeed 
     post={item}
     image={"https://picsum.photos/1920/1080"}
-    onVotePost={onVotePost}
   />
 )
 
-const onVotePost = (id, vote) => {
-  console.log(`post id ${id} vote: ${vote}`);
-}
-
 const Feed = ({ navigation }) => {
+  const [initialFetch, setInitialFetch] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [posts, setPosts] = useState([]);
-  const [index, setIndex] = useState(15);
 
-  const { logout } = useContext(UserContext);
+  const { loginState, logout } = useContext(UserContext);
 
   useEffect(() => {
     console.log('fetching posts...');
 
-    fetch(`${env.ONLYPANS_API_URL}/posts`, {
+    fetch(`${env.ONLYPANS_API_URL}/api/v1/posts`, {
       method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${loginState.accessToken}`
+      }
     })
     .then(res => res.json())
     .then(posts => setPosts(posts))
@@ -44,38 +41,12 @@ const Feed = ({ navigation }) => {
   }, [refreshing]);
 
   const handleOnEndReached = () => {
-    // fetch more posts
-    const morePosts = [...posts,
-      {
-        id: index,
-        username: '@spongebob',
-        body: 'Who lives in a pineapple under the sea?',
-        vote: 'up'
-      },
-      {
-        id: index + 1,
-        username: '@patrick',
-        body: 'Spongebob squarepants!',
-        vote: 'up'
-      },
-      {
-        id: index + 2,
-        username: '@plankton',
-        body: 'No it\s not',
-        vote: 'up'
-      },
-      {
-        id: index + 3,
-        username: '@plankton',
-        body: 'the recipe is mine muahahaa',
-        vote: 'down'
-      },
-    ];
+    if (initialFetch) {
+      setInitialFetch(false);
 
-    let newIndex = index + 4;
-
-    setPosts(morePosts);
-    setIndex(index + 4);
+      return;
+    }
+    console.log('on end');
   }
 
   const handleLogout = async () => {

@@ -1,50 +1,72 @@
-import { useState, useEffect, memo } from "react";
+import { useState, useEffect, useContext } from "react";
 import { StyleSheet, View, Text, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import ActionButton from "./ActionButton";
 import env from "../env";
+import { UserContext } from "./Context";
 
-const colors = {
-  green: 'green',
-  red: 'red',
-  black: 'black',
+const COLOR = {
+  GREEN: 'green',
+  RED: 'red',
+  BLACK: 'black',
+};
+
+const RATE  = {
+  LIKE: 'like',
+  DISLIKE: 'dislike',
+  NEUTRAL: 'neutral'
 };
 
 const Post = ({ post, image }) => {
-  const [vote, setVote] = useState(post.vote || null);
+  const [rating, setRating] = useState({});
+  const { loginState } = useContext(UserContext);
 
-  const updateVote = async (vote) => {
-    const res = await fetch(`${env.ONLYPANS_API_URL}/posts/${post.id}/vote`, {
+  useEffect(() => (
+    setRating({
+      liked: post.rating.liked,
+      disliked: post.rating.disliked
+    })
+  ), []);
+
+  const updateRating = async (payload, prevRating) => {
+    payload.id = post.id;
+
+    const res = await fetch(`${env.ONLYPANS_API_URL}/api/v1/users/${loginState.userId}/ratings`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${loginState.accessToken}`
       },
-      body: JSON.stringify({
-        vote,
-      }),
+      body: JSON.stringify(payload)
     });
 
     if (res.status !== 200) {
-      console.error(`Error updating vote for post ${post.id}`);
+      setRating(prevRating);
     }
   }
 
-  const onVotePost = (id, vote) => {
-    console.log(`post id ${id} vote: ${vote}`);
-  }
+  const handleRating = (value) => {
+    const prevRating = { ...rating };
 
-  const handleVote = (value) => {
-    if ((vote === 'up' && value === 'up') || (vote === 'down' && value === 'down')) {
-      onVotePost(post.id, null);
-      setVote(null);
-      updateVote('');
+    if ((rating.liked && value === RATE.LIKE) || (rating.disliked && value === RATE.DISLIKE)) {
+      setRating({
+        liked: false,
+        disliked: false
+      });
+
+      updateRating({ rating: 'neutral' }, prevRating);
 
       return;
     }
 
-    onVotePost(post.id, value);
-    setVote(value);
-    updateVote(value);
+    const liked = value === RATE.LIKE;
+
+    setRating({
+      liked: liked,
+      disliked: !liked
+    });
+
+    liked ? updateRating({ rating: 'like' }, prevRating) : updateRating({ rating: 'dislike' }, prevRating);
   }
 
   return (
@@ -62,15 +84,15 @@ const Post = ({ post, image }) => {
       <View style={styles.contentContainer}>
         <View style={styles.userBodyContainer}>
           <View style={{ marginBottom: 5 }}>
-            <Text style={styles.username}>{post.username}</Text>
+            <Text style={styles.username}>{post.user.username}</Text>
           </View>
           <View>
-            <Text>{post.body}</Text>
+            <Text>{post.content}</Text>
           </View>
         </View>
         <View style={{ flexDirection: "row-reverse" }}>
-          <ActionButton name={"arrow-down"} size={20} color={vote === 'down' ? colors.red : colors.black} onPress={() => handleVote('down')} />
-          <ActionButton name={"arrow-up"} size={20} color={vote === 'up' ? colors.green : colors.black} onPress={() => handleVote('up')} />
+          <ActionButton name={"arrow-down"} size={20} color={rating.disliked ? COLOR.RED : COLOR.BLACK} onPress={() => handleRating(RATE.DISLIKE)} />
+          <ActionButton name={"arrow-up"} size={20} color={rating.liked ? COLOR.GREEN : COLOR.BLACK} onPress={() => handleRating(RATE.LIKE)} />
         </View>
       </View>
     </View>

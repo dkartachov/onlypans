@@ -1,26 +1,61 @@
 import { Router} from 'express';
+import sql from '../db/db.js';
 import jwt from 'jsonwebtoken';
-
-const users = [
-  'deniskartachov',
-  'charlieborzoi',
-  'marmarodidi',
-];
+import bcrypt from 'bcrypt';
+import STATUS from '../utils/status.js';
 
 const router = Router();
 
-router.post('/', (req, res) => {
-  const { username } = req.body;
+router.post('/', async (req, res) => {
+  const { username, password } = req.body;
 
-  if (!username) return res.status(404).json('User not provided');
+  if (!username || !password) {
+    const parameters = [];
 
-  if (!users.includes(username)) {
-    return res.status(404).json('User not found');
+    !username && parameters.push('username');
+    !password && parameters.push('password');
+
+    res.status(STATUS.BAD_REQUEST).json({
+      message: 'missing parameters',
+      parameters,
+    }); 
+    
+    return;
   }
 
-  const accessToken = jwt.sign({ username }, process.env.ONLYPANS_API_SECRET);
+  const query = await sql`SELECT user_id, password FROM users WHERE username = ${username}`;
 
-  res.status(200).json({ accessToken });
+  if (query.length < 1) {
+    res.status(STATUS.NOT_FOUND).json({
+      message: 'User not found'
+    });
+
+    return;
+  }
+
+  const hash = query[0].password;
+  const valid = await bcrypt.compare(password, hash);
+
+  if (!valid) {
+    res.status(STATUS.FORBIDDEN).json({
+      message: 'Incorrect password'
+    });
+
+    return;
+  }
+
+  const userId = query[0].user_id;
+  const payload = {
+    user: username,
+    userId
+  };
+
+  const accessToken = jwt.sign(payload, process.env.ONLYPANS_API_SECRET);
+
+  res.status(STATUS.OK).json({
+    message: 'Login successful',
+    accessToken
+  });
 });
 
 export default router;
