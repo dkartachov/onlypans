@@ -11,6 +11,10 @@ const MESSAGE = {
     message: `Invalid query parameter '${parameter}'`,
     reason: `Query parameter '${name}' must be of type '${type}'`
   }),
+  MISSING_PARAMETERS: (names = []) => ({
+    message: 'Missing parameter',
+    reason: `Body must contain parameters: ${names.join(', ')}`
+  }),
   CUSTOM: (message, reason = '') => ({
     message,
     reason

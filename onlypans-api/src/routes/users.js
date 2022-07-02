@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import ratings from './ratings.js';
+import likes from './likes.js';
 import sql from '../db/db.js';
 import STATUS from '../utils/status.js';
 import MESSAGE from '../utils/messages.js';
@@ -45,7 +45,7 @@ router.get('/', async (req, res) => {
   res.status(STATUS.OK).json(users);
 });
 
-router.use('/:id/ratings', (req, res, next) => {
+router.use('/:id/likes', (req, res, next) => {
   const { id } = req.params;
 
   if (!Number.isInteger(parseInt(id))) {
@@ -55,6 +55,6 @@ router.use('/:id/ratings', (req, res, next) => {
   req.body.userId = req.params.id;
 
   next();
-}, ratings);
+}, likes);
 
 export default router;

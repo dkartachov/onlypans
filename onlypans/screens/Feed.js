@@ -1,51 +1,75 @@
-import { useState, useEffect, useContext, useMemo } from 'react';
-import { StyleSheet, SafeAreaView, View, StatusBar, FlatList, ActivityIndicator } from 'react-native';
+import { useState, useEffect, useContext, useCallback } from 'react';
+import { StyleSheet, View, FlatList, ActivityIndicator } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { FAB } from 'react-native-paper';
-import PostFeed from '../components/PostFeed';
-import env from '../env';
+import Post from '../components/Post';
 import { UserContext } from '../components/Context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const renderItem = ({ item }) => (
-  <PostFeed 
-    post={item}
-    image={"https://picsum.photos/1920/1080"}
-  />
-)
+import { fetchLatestPosts, refreshPost } from '../api';
+import { useFocusEffect } from '@react-navigation/native';
 
 const Feed = ({ navigation }) => {
-  const [initialFetch, setInitialFetch] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [posts, setPosts] = useState([]);
+  const [index, setIndex] = useState(14);
+  const [currentPost, setCurrentPost] = useState();
 
   const { loginState, logout } = useContext(UserContext);
 
   useEffect(() => {
-    console.log('fetching posts...');
+    console.log('Fetching latest posts...');
 
-    fetch(`${env.ONLYPANS_API_URL}/api/v1/posts`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${loginState.accessToken}`
-      }
-    })
+    fetchLatestPosts(loginState.accessToken)
     .then(res => res.json())
-    .then(posts => setPosts(posts))
-    .catch(error => console.log('error fetching posts', error))
-    .finally(() => {
-      setRefreshing(false);
-      console.log('fetched posts successfully')
-    });
+    .then(posts => setPosts(() => posts))
+    .catch(error => console.log('Error fetching latest posts', error))
+    .finally(() => console.log('Fetched latest posts.'));
+  }, []);
 
-  }, [refreshing]);
+  useFocusEffect(
+    useCallback(() => {
+      if (currentPost == null) return;
+      
+      console.log('Updating post...');
+
+      refreshPost(loginState.accessToken, currentPost)
+      .then(res => res.json())
+      .then(post => {
+        setPosts(posts.map(p => p.id === post.id ? post : p));
+      })
+      .catch(error => console.log('Error updating post', error))
+      .finally(() => console.log('Updated post.'));
+    }, [currentPost])
+  );
 
   const handleOnEndReached = () => {
-    if (initialFetch) {
-      setInitialFetch(false);
+    setPosts([
+      ...posts,
+      {
+        "id": index,
+        "content": "Hehehehehhe",
+        "mediaUrl": null,
+        "likes": 1,
+        "dislikes": 1,
+        "liked": null,
+        "disliked": null,
+        "date": "2022-06-24T21:29:41.368Z"
+      }
+    ])
 
-      return;
-    }
+    // posts.push({
+    //   "id": index,
+    //   "content": "Hehehehehhe",
+    //   "mediaUrl": null,
+    //   "likes": 1,
+    //   "dislikes": 1,
+    //   "liked": null,
+    //   "disliked": null,
+    //   "date": "2022-06-24T21:29:41.368Z"
+    // })
+
+    setIndex(() => index + 1);
+
     console.log('on end');
   }
 
@@ -57,7 +81,24 @@ const Feed = ({ navigation }) => {
 
   const onRefresh = () => {
     setRefreshing(true);
+    setRefreshing(false);
   }
+
+  const navigate = (id, image) => {
+    const post = posts.find(p => p.id === id);
+
+    setCurrentPost(post.id);
+
+    navigation.navigate('PostDetail', { post, image });
+  }
+
+  const renderItem = ({ item }) => (
+    <Post 
+      post={item}
+      image={'https://picsum.photos/1920/1080'}
+      navigate={navigate}
+    />
+  )
 
   return (
     <View style={styles.container}>

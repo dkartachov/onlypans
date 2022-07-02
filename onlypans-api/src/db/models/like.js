@@ -1,7 +1,5 @@
-const Rating = (record) => ({
-  id: record.rating_id,
-  liked: record.liked,
-  disliked: record.disliked,
+const Like = (record) => ({
+  id: record.like_id,
   user: {
     id: record.user_id,
     username: record.username
@@ -11,9 +9,8 @@ const Rating = (record) => ({
     content: record.content,
     mediaUrl: record.media_url,
     date: record.posted_date,
-    likes: record.likes,
-    dislikes: record.dislikes
+    likes: record.likes
   }
 })
 
-export default Rating;
+export default Like;

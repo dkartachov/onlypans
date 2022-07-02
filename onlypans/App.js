@@ -3,12 +3,12 @@ import { NavigationContainer } from '@react-navigation/native';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { UserContext } from './components/Context';
-import Feed from './screens/Feed';
 import Home from './screens/Home';
 import PostDetail from './screens/PostDetail';
 import Login from './screens/Login';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import jwtDecode from 'jwt-decode';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 const Stack = createNativeStackNavigator();
 
@@ -86,49 +86,51 @@ const App = () => {
   else
     return (
       <UserContext.Provider value={{ loginState, login: userContext.login, logout: userContext.logout }}>
-        <NavigationContainer>
-          <Stack.Navigator>
-            {loginState.accessToken ? (
-              <>
-                <Stack.Screen 
-                  name='Home' 
-                  component={Home}
-                  options={{
-                    title: 'Home',
-                    headerShown: false,
-                    headerStyle: {
-                      backgroundColor: 'white',
-                    },
-                  }}
-                />
-                <Stack.Screen 
-                  name='PostDetail'
-                  component={PostDetail}
-                  options={{
-                    headerTitle: 'Post',
-                    headerStyle: {
-                      backgroundColor: 'white',
-                    }
-                  }}
-                />
-              </>
-            ) : (
-              <>
-                <Stack.Screen 
-                  name='Login'
-                  component={Login}
-                  options={{
-                    title: 'Login',
-                    headerStyle: {
-                      backgroundColor: 'white',
-                    }
-                  }}
-                />
-              </>
-            )
-          }
-          </Stack.Navigator>
-        </NavigationContainer>
+          <NavigationContainer>
+              <SafeAreaProvider>
+            <Stack.Navigator>
+                {loginState.accessToken ? (
+                  <>
+                    <Stack.Screen 
+                      name='Home' 
+                      component={Home}
+                      options={{
+                        title: 'Home',
+                        headerShown: false,
+                        headerStyle: {
+                          backgroundColor: 'white',
+                        },
+                      }}
+                    />
+                    <Stack.Screen 
+                      name='PostDetail'
+                      component={PostDetail}
+                      options={{
+                        headerTitle: 'Post',
+                        headerStyle: {
+                          backgroundColor: 'white',
+                        }
+                      }}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <Stack.Screen 
+                      name='Login'
+                      component={Login}
+                      options={{
+                        title: 'Login',
+                        headerStyle: {
+                          backgroundColor: 'white',
+                        }
+                      }}
+                    />
+                  </>
+                )
+              }
+            </Stack.Navigator>
+              </SafeAreaProvider>
+          </NavigationContainer>
       </UserContext.Provider>
     );
 }

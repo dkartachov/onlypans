@@ -1,106 +1,86 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, memo } from "react";
 import { StyleSheet, View, Text, TouchableOpacity, Image } from "react-native";
-import { Ionicons } from '@expo/vector-icons';
-import ActionButton from "./ActionButton";
-import env from "../env";
+import SocialButton from "./SocialButton";
+import LikeButton from "./LikeButton";
 import { UserContext } from "./Context";
+import { like, unlike } from "../api";
+import color from "../globals/color";
 
-const COLOR = {
-  GREEN: 'green',
-  RED: 'red',
-  BLACK: 'black',
-};
-
-const RATE  = {
-  LIKE: 'like',
-  DISLIKE: 'dislike',
-  NEUTRAL: 'neutral'
-};
-
-const Post = ({ post, image }) => {
-  const [rating, setRating] = useState({});
+const Post = ({ post, image, navigate }) => {
+  const [liked, setLiked] = useState(post.liked);
+  const [likes, setLikes] = useState(post.likes);
   const { loginState } = useContext(UserContext);
 
-  useEffect(() => (
-    setRating({
-      liked: post.rating.liked,
-      disliked: post.rating.disliked
-    })
-  ), []);
+  console.debug(`re-rendered: ${post.id}`);
 
-  const updateRating = async (payload, prevRating) => {
-    payload.id = post.id;
+  useEffect(() => {
+    setLikes(post.likes);
+    setLiked(post.liked);
+  }, [post])
 
-    const res = await fetch(`${env.ONLYPANS_API_URL}/api/v1/users/${loginState.userId}/ratings`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${loginState.accessToken}`
-      },
-      body: JSON.stringify(payload)
-    });
+  const onPressLike = async () => {
+    const prevLike = liked;
+
+    setLiked(() => !liked);
+
+    let user = {
+      userId: loginState.userId,
+      accessToken: loginState.accessToken
+    };
+    
+    const res = prevLike ? await unlike(user, post.id) : await like(user, post.id);
 
     if (res.status !== 200) {
-      setRating(prevRating);
-    }
-  }
-
-  const handleRating = (value) => {
-    const prevRating = { ...rating };
-
-    if ((rating.liked && value === RATE.LIKE) || (rating.disliked && value === RATE.DISLIKE)) {
-      setRating({
-        liked: false,
-        disliked: false
-      });
-
-      updateRating({ rating: 'neutral' }, prevRating);
+      setLiked(prevLike);
 
       return;
     }
 
-    const liked = value === RATE.LIKE;
+    const newLikes = prevLike ? likes - 1 : likes + 1;
 
-    setRating({
-      liked: liked,
-      disliked: !liked
-    });
-
-    liked ? updateRating({ rating: 'like' }, prevRating) : updateRating({ rating: 'dislike' }, prevRating);
+    setLikes(newLikes);
   }
 
   return (
-    <View style={styles.postContainer}>
-      <Image
-        source={{
-          uri: image
-        }}
-        style={{
-          width: 60,
-          height: 60,
-          borderRadius: 60/2,
-        }}
-      />
-      <View style={styles.contentContainer}>
-        <View style={styles.userBodyContainer}>
-          <View style={{ marginBottom: 5 }}>
-            <Text style={styles.username}>{post.user.username}</Text>
+    <TouchableOpacity
+      activeOpacity={0.5}
+      delayPressIn={20}
+      onPress={() => navigate(post.id, image)}
+    >
+      <View style={styles.post}>
+        <Image
+          source={{
+            uri: image
+          }}
+          style={{
+            width: 50,
+            height: 50,
+            borderRadius: 50/2,
+          }}
+        />
+        <View style={styles.content}>
+          <View style={styles.user}>
+            <View style={{ marginBottom: 5 }}>
+              <Text style={styles.username}>{post.user.username}</Text>
+            </View>
+            <View>
+              <Text>{post.content}</Text>
+            </View>
           </View>
-          <View>
-            <Text>{post.content}</Text>
+          <View style={{ flexDirection: "row-reverse" }}>
+            {/* <SocialButton name={liked ? 'heart' : 'heart-outline'} text={likes} size={20} color={liked ? color.RED : color.BLACK} onPress={onPressLike} /> */}
+            <LikeButton liked={liked} likes={likes} onPressLike={onPressLike}/>
+            <SocialButton name={'chatbubble-outline'} size={20}/>
           </View>
-        </View>
-        <View style={{ flexDirection: "row-reverse" }}>
-          <ActionButton name={"arrow-down"} size={20} color={rating.disliked ? COLOR.RED : COLOR.BLACK} onPress={() => handleRating(RATE.DISLIKE)} />
-          <ActionButton name={"arrow-up"} size={20} color={rating.liked ? COLOR.GREEN : COLOR.BLACK} onPress={() => handleRating(RATE.LIKE)} />
         </View>
       </View>
-    </View>
+      <View style={styles.horizontalLine}/>
+    </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  postContainer: {
+  post: {
     flexDirection: "row",
     backgroundColor: 'white',
     paddingTop: 20,
@@ -108,22 +88,25 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     marginHorizontal: 5,
   },
-  contentContainer: {
+  content: {
     flex: 1,
     backgroundColor: 'white',
     marginStart: 20,
   },
-  userBodyContainer: {
+  user: {
     backgroundColor: 'white',
   },
   username: {
     color: 'black',
-    fontWeight: "bold",
+    fontWeight: "bold"  
+  },
+  rating: {
+    textAlignVertical: 'center'
   },
   horizontalLine: {
-    borderBottomColor: 'black',
+    borderBottomColor: 'grey',
     borderBottomWidth: StyleSheet.hairlineWidth,
   }
 });
 
-export default Post;
+export default memo(Post, (prevProps, nextProps) => prevProps.post === nextProps.post);

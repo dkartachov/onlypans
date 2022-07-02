@@ -3,15 +3,11 @@ const Post = (record) => ({
   content: record.content,
   mediaUrl: record.media_url,
   likes: record.likes,
-  dislikes: record.dislikes,
+  liked: record.like_id ? true : false,
   date: record.posted_date,
   user: {
     id: record.user_id,
     username: record.username,
-  },
-  rating: {
-    liked: record.liked,
-    disliked: record.disliked
   }
 })
 
