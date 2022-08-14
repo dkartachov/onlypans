@@ -1,4 +1,5 @@
 const MESSAGE = {
+  GENERIC: `Something went horribly wrong. It's not your fault, we promise!`,
   NOT_FOUND: (resource, value) => ({
     message: `${resource} not found`,
     reason: `${resource} with id ${value} does not exist`

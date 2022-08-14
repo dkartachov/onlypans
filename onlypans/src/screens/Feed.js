@@ -1,86 +1,83 @@
 import { useState, useEffect, useContext, useCallback } from 'react';
 import { StyleSheet, View, FlatList, ActivityIndicator } from 'react-native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { FAB } from 'react-native-paper';
+// import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import FAB from '../components/FAB';
 import Post from '../components/Post';
-import { UserContext } from '../components/Context';
+import { useAuth } from '../context/AuthProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { fetchLatestPosts, refreshPost } from '../api';
-import { useFocusEffect } from '@react-navigation/native';
+import { fetchPosts, refreshPost } from '../api';
+import { useFocusEffect, useTheme } from '@react-navigation/native';
+
+const image = 'https://picsum.photos/1920/1080';
 
 const Feed = ({ navigation }) => {
+  const { colors } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
   const [posts, setPosts] = useState([]);
   const [index, setIndex] = useState(14);
   const [currentPost, setCurrentPost] = useState();
+  const [latestPostId, setLatestPostId] = useState();
+  const [oldestPostId, setOldestPostId] = useState();
 
-  const { loginState, logout } = useContext(UserContext);
+  const { auth, logout } = useAuth();
 
   useEffect(() => {
-    console.log('Fetching latest posts...');
+    console.debug('Fetching latest posts...');
 
-    fetchLatestPosts(loginState.accessToken)
+    fetchPosts(auth.accessToken)
     .then(res => res.json())
-    .then(posts => setPosts(() => posts))
-    .catch(error => console.log('Error fetching latest posts', error))
-    .finally(() => console.log('Fetched latest posts.'));
+    .then(posts => {
+      setPosts(posts);
+      setLatestPostId(posts[0].id);
+      setOldestPostId(posts[posts.length - 1].id);
+
+      console.debug('Fetched latest posts.');
+    })
+    .catch(error => console.debug('Error fetching latest posts', error));
   }, []);
 
   useFocusEffect(
     useCallback(() => {
       if (currentPost == null) return;
       
-      console.log('Updating post...');
+      console.debug('Updating post...');
 
-      refreshPost(loginState.accessToken, currentPost)
+      refreshPost(auth.accessToken, currentPost)
       .then(res => res.json())
       .then(post => {
         setPosts(posts.map(p => p.id === post.id ? post : p));
+        return post;
       })
-      .catch(error => console.log('Error updating post', error))
-      .finally(() => console.log('Updated post.'));
+      .then(post => console.debug(`Updated post ${post.id}`))
+      .catch(error => console.debug('Error updating post', error));
     }, [currentPost])
   );
 
   const handleOnEndReached = () => {
-    setPosts([
-      ...posts,
-      {
-        "id": index,
-        "content": "Hehehehehhe",
-        "mediaUrl": null,
-        "likes": 1,
-        "dislikes": 1,
-        "liked": null,
-        "disliked": null,
-        "date": "2022-06-24T21:29:41.368Z"
+    fetchPosts(auth.accessToken, {
+      afterId: oldestPostId
+    })
+    .then(res => res.json())
+    .then(p => {
+      setPosts(() => posts.concat(p));
+
+      if (p.length) {
+        setOldestPostId(p[p.length - 1].id);
       }
-    ])
-
-    // posts.push({
-    //   "id": index,
-    //   "content": "Hehehehehhe",
-    //   "mediaUrl": null,
-    //   "likes": 1,
-    //   "dislikes": 1,
-    //   "liked": null,
-    //   "disliked": null,
-    //   "date": "2022-06-24T21:29:41.368Z"
-    // })
-
-    setIndex(() => index + 1);
-
-    console.log('on end');
+    });
   }
 
-  const handleLogout = async () => {
-    await AsyncStorage.removeItem('accessToken');
+  const handleAddPost = () => {
+    setCurrentPost(null);
 
-    logout();
+    navigation.navigate('AddPost', { image });
   }
 
-  const onRefresh = () => {
+  const handleOnRefresh = () => {
     setRefreshing(true);
+
+
     setRefreshing(false);
   }
 
@@ -95,7 +92,7 @@ const Feed = ({ navigation }) => {
   const renderItem = ({ item }) => (
     <Post 
       post={item}
-      image={'https://picsum.photos/1920/1080'}
+      image={image}
       navigate={navigate}
     />
   )
@@ -107,34 +104,21 @@ const Feed = ({ navigation }) => {
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         refreshing={refreshing}
-        onRefresh={onRefresh}
+        onRefresh={handleOnRefresh}
         onEndReached={handleOnEndReached}
         removeClippedSubviews={true}
         // ListFooterComponentStyle={{flex:1, justifyContent: 'flex-end'}}
         ListFooterComponent={posts.length && <ActivityIndicator size={40} color={'red'} />}
         contentContainerStyle={{flexGrow: 1}}
       />
-      <FAB icon={() => <MaterialIcons size={24} name='logout'/>} onPress={handleLogout} style={styles.fab}/>
+      <FAB name='add' onPress={handleAddPost} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: 'white',
-  },
-  fab: {
-    backgroundColor: 'lightblue',
-    position:'absolute', 
-    alignItems: 'center',
-    alignContent: 'center',
-    width: 60, 
-    height: 60, 
-    borderRadius: 30,
-    right: 0, 
-    bottom: 0, 
-    margin: 5, 
+    flex: 1
   }
 });
 

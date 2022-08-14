@@ -1,11 +1,16 @@
 import { Router } from 'express';
-import likes from './likes.js';
-import sql from '../db/db.js';
-import STATUS from '../utils/status.js';
-import MESSAGE from '../utils/messages.js';
-import User from '../db/models/user.js';
+import likes from '../likes.js';
+import posts from './posts.js';
+import sql from '../../db/db.js';
+import STATUS from '../../utils/status.js';
+import MESSAGE from '../../utils/messages.js';
+import User from '../../db/models/user.js';
+import UserMidware from '../../middleware/UserMidware.js';
 
 const router = Router();
+
+router.use('/:id/likes', UserMidware, likes);
+router.use('/:id/posts', UserMidware, posts);
 
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
@@ -44,17 +49,5 @@ router.get('/', async (req, res) => {
 
   res.status(STATUS.OK).json(users);
 });
-
-router.use('/:id/likes', (req, res, next) => {
-  const { id } = req.params;
-
-  if (!Number.isInteger(parseInt(id))) {
-    return res.status(STATUS.BAD_REQUEST).json(MESSAGE.INVALID_PARAMETER(id, 'id', 'integer'));
-  }
-
-  req.body.userId = req.params.id;
-
-  next();
-}, likes);
 
 export default router;

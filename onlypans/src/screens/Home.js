@@ -10,7 +10,7 @@ const Home = () => {
     <Tab.Navigator
       initialRouteName='Feed'
       screenOptions={({ route }) => ({
-        tabBarActiveTintColor: 'red',
+        tabBarActiveTintColor: '#C84B31',
         tabBarShowLabel: false,
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;

@@ -1,27 +1,51 @@
-import { useState, useEffect, useLayoutEffect, useContext } from "react";
-import { View, Text, Image, StyleSheet, Button } from "react-native";
+import { useState, useEffect } from "react";
+import { View, Image, StyleSheet, FlatList } from "react-native";
 import SocialButton from "../components/SocialButton";
 import LikeButton from "../components/LikeButton";
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { RATE, handleRatings } from "../components/Utils";
-import color from "../globals/color";
-import { UserContext } from "../components/Context";
+import Comment from "../components/Comment";
+import Stanza from "../components/Stanza";
+import { useAuth } from "../context/AuthProvider";
 import { refreshPost, like, unlike } from "../api";
 
 const PostDetail = ({ route, navigation }) => {
   const { post, image } = route.params;
   const [liked, setLiked] = useState();
   const [likes, setLikes] = useState();
-  const { loginState } = useContext(UserContext);
+  const [comments, setComments] = useState([]);
+  const { auth } = useAuth();
 
   useEffect(() => {
     console.log('Updating detailed post...');
 
-    refreshPost(loginState.accessToken, post.id)
+    // change to pull more data like comments
+    refreshPost(auth.accessToken, post.id)
     .then(res => res.json())
     .then(post => {
       setLiked(post.liked);
       setLikes(post.likes);
+      setComments([
+        {
+          id: 1,
+          content: 'Junkrat is overrated lol',
+          user: {
+            username: 'dumbfuck'
+          }
+        },
+        {
+          id: 2,
+          content: 'Nice! I main Roadhog',
+          user:  {
+            username: 'someguy'
+          }
+        },
+        {
+          id: 3,
+          content: 'What do you think about Overwatch 2? Cause you won\' be able to play Overwatch soon...',
+          user: {
+            username: 'motherfucker'
+          }
+        }
+      ])
     })
     .then(() => console.log('Updated detailed post.'))
     .catch(error => console.log('Error pulling post data', error))
@@ -33,8 +57,8 @@ const PostDetail = ({ route, navigation }) => {
     setLiked(() => !liked);
 
     let user = {
-      userId: loginState.userId,
-      accessToken: loginState.accessToken
+      userId: auth.userId,
+      accessToken: auth.accessToken
     };
     
     const res = prevLike ? await unlike(user, post.id) : await like(user, post.id);
@@ -51,75 +75,81 @@ const PostDetail = ({ route, navigation }) => {
   }
   
   return (
-    <View style={styles.postContainer}>
-      <View style={styles.postHeader}>
-        <Image 
-          source={{
-            uri: image
-          }}
-          style={{
-            width: 50,
-            height: 50,
-            borderRadius: 50/2
-          }}
-        />
-        <Text style={styles.username}>{post.user.username}</Text>
-      </View>
-      <View style={styles.contentContainer}>
-        <Text>{post.content}</Text>
-      </View>
-        
-        
-        {/* <Image
-          source={{
-            uri: image
-          }}
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 40/2,
-          }}
-        />
-        <View style={styles.contentContainer}>
-          <View style={styles.userBodyContainer}>
-            <View style={{ marginBottom: 5 }}>
-              <Text style={styles.username}>{post.user.username}</Text>
-            </View>
-            <View>
-              <Text>{post.content}</Text>
+    <View style={styles.container}>
+      <View>
+        <View style={styles.post}>
+          <Image
+            source={{
+              uri: image
+            }}
+            style={{
+              width: 50,
+              height: 50,
+              borderRadius: 50/2,
+            }}
+          />
+          <View style={styles.content}>
+            <View style={styles.user}>
+              <View style={{ marginBottom: 5 }}>
+                <Stanza style={styles.username}>{post.user.username}</Stanza>
+              </View>
+              <View>
+                <Stanza>{post.content}</Stanza>
+              </View>
             </View>
           </View>
-          <View style={{ flexDirection: "row-reverse" }}>
-            <LikeButton liked={liked} likes={likes} onPressLike={onPressLike}/>
-            <SocialButton name={'chatbubble-outline'} size={20}/>
-          </View>
-        </View> */}
+        </View>
+        <View style={styles.horizontalLine}/>
+        <View style={styles.metadata}>
+          <Stanza>0 comments</Stanza>
+          <Stanza>{`${likes} likes`}</Stanza>
+        </View>
+        <View style={styles.horizontalLine}/>
+        <View style={styles.buttons}>
+          <SocialButton name={'chatbubble-outline'} size={22}/>
+          <LikeButton liked={liked} onPressLike={onPressLike}/>
+        </View>
+        <View style={styles.horizontalLine}/>
+      </View>
+      <FlatList 
+        data={comments}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <Comment comment={item}/>}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  postContainer: {
-    backgroundColor: 'white',
-    padding: 10
+  container: {
+    flex: 1
   },
-  postHeader: {
-    flexDirection: 'row'
+  post: {
+    flexDirection: "row",
+    padding: 20
   },
-  contentContainer: {
-    padding: 10
+  content: {
+    flex: 1,
+    marginStart: 20,
   },
-  userBodyContainer: {
-    backgroundColor: 'white',
+  user: {
+    // backgroundColor: 'white',
   },
   username: {
-    marginStart: 10,
-    marginTop: 5,
-    color: 'black',
-    fontWeight: "bold"
+    fontWeight: 'bold'
   },
   rating: {
     textAlignVertical: 'center'
+  },
+  metadata: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    paddingVertical: 3
+  },
+  buttons: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    paddingVertical: 3
   },
   horizontalLine: {
     borderBottomColor: 'grey',

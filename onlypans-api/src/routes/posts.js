@@ -50,9 +50,16 @@ router.get('/:id', async (req, res) => {
 
 router.get('/', async (req, res) => {
   const limit = req.query.limit || 10;
+  const { afterId } = req.query;
 
   if (!Number.isInteger(parseInt(limit))) {
     res.status(STATUS.BAD_REQUEST).json(MESSAGE.INVALID_QUERY_PARAMETER(req.query.limit, 'limit', 'integer'));
+
+    return;
+  }
+
+  if (afterId && !Number.isInteger(parseInt(afterId))) {
+    res.status(STATUS.BAD_REQUEST).json(MESSAGE.INVALID_QUERY_PARAMETER(req.query.afterId, 'afterId', 'integer'));
 
     return;
   }
@@ -73,6 +80,7 @@ router.get('/', async (req, res) => {
   const records = await sql`
   WITH latest_posts AS (
     SELECT * FROM posts
+    ${afterId ? sql`WHERE post_id < ${afterId}` : sql``}
     ORDER BY post_id DESC
     LIMIT ${limit}
   ), posts_liked_by_user AS (
@@ -81,6 +89,7 @@ router.get('/', async (req, res) => {
       SELECT user_id FROM users 
       WHERE username = ${user}
     )
+    ${afterId ? sql`AND post_id < ${afterId}` : sql``}
     ORDER BY post_id DESC
     LIMIT ${limit}
   )

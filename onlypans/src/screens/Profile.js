@@ -1,13 +1,13 @@
 import { useContext } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { UserContext } from '../components/Context';
+import { useAuth } from '../context/AuthProvider';
 
 const Profile = () => {
-  const { loginState } = useContext(UserContext);
+  const { auth } = useAuth();
 
   return (
     <View style={styles.container}>
-      <Text>{loginState.user}</Text>
+      <Text>{auth.user}</Text>
     </View>
   );
 }

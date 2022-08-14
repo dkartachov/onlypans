@@ -1,15 +1,17 @@
-import { useState, useEffect, useContext, memo } from "react";
-import { StyleSheet, View, Text, TouchableOpacity, Image } from "react-native";
+import { useState, useEffect, memo } from "react";
+import { StyleSheet, View, TouchableOpacity, Image } from "react-native";
+import Stanza from "./Stanza";
+import { useTheme } from "@react-navigation/native";
 import SocialButton from "./SocialButton";
 import LikeButton from "./LikeButton";
-import { UserContext } from "./Context";
+import { useAuth } from "../context/AuthProvider";
 import { like, unlike } from "../api";
-import color from "../globals/color";
 
 const Post = ({ post, image, navigate }) => {
+  const { colors } = useTheme();
   const [liked, setLiked] = useState(post.liked);
   const [likes, setLikes] = useState(post.likes);
-  const { loginState } = useContext(UserContext);
+  const { auth } = useAuth();
 
   console.debug(`re-rendered: ${post.id}`);
 
@@ -24,8 +26,8 @@ const Post = ({ post, image, navigate }) => {
     setLiked(() => !liked);
 
     let user = {
-      userId: loginState.userId,
-      accessToken: loginState.accessToken
+      userId: auth.userId,
+      accessToken: auth.accessToken
     };
     
     const res = prevLike ? await unlike(user, post.id) : await like(user, post.id);
@@ -61,16 +63,15 @@ const Post = ({ post, image, navigate }) => {
         <View style={styles.content}>
           <View style={styles.user}>
             <View style={{ marginBottom: 5 }}>
-              <Text style={styles.username}>{post.user.username}</Text>
+              <Stanza style={styles.username}>{post.user.username}</Stanza>
             </View>
             <View>
-              <Text>{post.content}</Text>
+              <Stanza>{post.content}</Stanza>
             </View>
           </View>
           <View style={{ flexDirection: "row-reverse" }}>
-            {/* <SocialButton name={liked ? 'heart' : 'heart-outline'} text={likes} size={20} color={liked ? color.RED : color.BLACK} onPress={onPressLike} /> */}
             <LikeButton liked={liked} likes={likes} onPressLike={onPressLike}/>
-            <SocialButton name={'chatbubble-outline'} size={20}/>
+            <SocialButton name={'chatbubble-outline'} size={22}/>
           </View>
         </View>
       </View>
@@ -81,24 +82,20 @@ const Post = ({ post, image, navigate }) => {
 
 const styles = StyleSheet.create({
   post: {
-    flexDirection: "row",
-    backgroundColor: 'white',
+    flexDirection: 'row',
     paddingTop: 20,
     paddingHorizontal: 20,
-    marginVertical: 5,
-    marginHorizontal: 5,
+    margin: 5
   },
   content: {
     flex: 1,
-    backgroundColor: 'white',
     marginStart: 20,
   },
   user: {
-    backgroundColor: 'white',
+    // backgroundColor: 'white',
   },
   username: {
-    color: 'black',
-    fontWeight: "bold"  
+    fontWeight: 'bold'
   },
   rating: {
     textAlignVertical: 'center'

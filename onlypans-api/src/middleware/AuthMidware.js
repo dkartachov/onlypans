@@ -3,8 +3,6 @@ import MESSAGE from '../utils/messages.js';
 import STATUS from '../utils/status.js';
 
 export default (req, res, next) => {
-  console.log(`${req.originalUrl} endpoint hit`);
-
   const { authorization } = req.headers;
   const accessToken = authorization && authorization.split(' ')[1];
 

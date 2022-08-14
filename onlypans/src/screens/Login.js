@@ -1,6 +1,6 @@
-import { useState, useContext } from 'react';
+import { useState } from 'react';
 import { StyleSheet, View, Text, Keyboard, SafeAreaView, TextInput, TouchableOpacity } from 'react-native';
-import { UserContext } from '../components/Context';
+import { useAuth } from '../context/AuthProvider';
 import env from '../env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import jwtDecode from 'jwt-decode';
@@ -9,7 +9,7 @@ const Login = () => {
   const [username, setUsername] = useState(null);
   const [password, setPassword] = useState(null);
 
-  const { login } = useContext(UserContext);
+  const { login } = useAuth();
 
   const handleLogin = async () => {
     Keyboard.dismiss();
@@ -90,7 +90,6 @@ const Login = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
     alignItems: 'center',
     justifyContent: 'center'
   },

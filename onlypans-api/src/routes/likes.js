@@ -42,7 +42,11 @@ router.post('/', async (req, res) => {
     liked_by: userId
   };
 
-  await sql`INSERT INTO likes ${sql(newLike)}`;
+  try {
+    await sql`INSERT INTO likes ${sql(newLike)}`;
+  } catch (e) {
+    return res.status(STATUS.INTERNAL_SERVER_ERROR).json(MESSAGE.GENERIC);
+  }
 
   res.sendStatus(STATUS.OK);
 });
