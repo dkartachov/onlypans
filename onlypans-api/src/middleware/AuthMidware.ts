@@ -1,8 +1,10 @@
+import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import MESSAGE from '../utils/messages.js';
-import STATUS from '../utils/status.js';
+import MESSAGE from '../utils/Messages';
+import STATUS from '../utils/Status';
+import Token from '../types/token';
 
-export default (req, res, next) => {
+export default (req: Request, res: Response, next: NextFunction) => {
   const { authorization } = req.headers;
   const accessToken = authorization && authorization.split(' ')[1];
 
@@ -11,10 +13,10 @@ export default (req, res, next) => {
   }
 
   try {
-    const payload = jwt.verify(accessToken, process.env.ONLYPANS_API_SECRET);
+    const decoded = jwt.verify(accessToken, process.env.SECRET ?? '') as Token;
 
     req.body.auth = {};
-    req.body.auth.user = payload.user;
+    req.body.auth = decoded;
   } catch (e) {
     return res.status(STATUS.UNAUTHORIZED).json(MESSAGE.CUSTOM('Unauthorized', 'Invalid access token'));
   }
