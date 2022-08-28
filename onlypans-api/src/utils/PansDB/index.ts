@@ -6,12 +6,8 @@ export interface Payload {
   params?: any[]
 }
 
-export const Query = async <T>(payload: Payload): Promise<T | undefined> => {
-  try {
-    const { data } = await axios.post('/query', payload);
+export const Query = async <T>(payload: Payload): Promise<T> => {
+  const { data } = await axios.post('/query', payload);
 
-    return data;
-  } catch (error) {
-    console.log(error);
-  }
+  return data;
 }

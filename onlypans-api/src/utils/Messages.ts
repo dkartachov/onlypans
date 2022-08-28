@@ -1,6 +1,7 @@
 const MESSAGE = Object.freeze({
   GENERIC_SERVER_ERROR: `Something went horribly wrong. It's not your fault, we promise!`,
   GENERIC_FORBIDDEN: `Access forbidden: authentication failed.`,
+  GENERIC_NOT_FOUND: 'Resource not found.',
   NOT_FOUND: (resource: string, value: string | number) => ({
     message: `${resource} '${value}' not found`
   }),
