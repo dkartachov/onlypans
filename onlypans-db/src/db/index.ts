@@ -3,30 +3,27 @@ import { Pool } from 'pg';
 const pool = new Pool();
 
 export default {
-  oneOrNone: async (sql: string, params?: any[]) => {
-    try {
-      const result = await pool.query(sql, params);
+  any: async (sql: string, params?: any[]) => {
+    const result = await pool.query(sql, params);
 
-      if (result.rowCount !== 1) {
-        return null;
-      }
+    return result.rows as Object[];
+  },
+  none: async (sql: string, params?: any[]) => {
+    const result = await pool.query(sql, params);
 
-      return result.rows[0] as Object;
-    } catch (error) {
-      console.log('Error: ', error);
-
-      throw error;
+    if (result.rows.length !== 0) {
+      throw new Error('Expected no rows to return');
     }
   },
-  all: async (sql: string, params?: any[]) => {
-    try {
-      const result = await pool.query(sql, params);
+  oneOrNone: async (sql: string, params?: any[]) => {
+    const result = await pool.query(sql, params);
 
-      return result.rows as Object[];
-    } catch (error) {
-      console.log('Error: ', error);
-
-      throw error;
+    if (result.rows.length > 1) {
+      throw new Error('Expected one or no rows to return');
     }
-  }
+
+    if (result.rows.length === 0) return {};
+
+    return result.rows[0] as Object;
+  },
 }

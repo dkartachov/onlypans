@@ -1,9 +1,11 @@
 import { Router } from 'express';
 import db from '../db';
+import MESSAGE from '../utils/Messages';
+import STATUS from '../utils/Status';
 
 interface Payload {
   query: string,
-  method?: 'oneOrNone' | 'all',
+  method?: 'any' | 'none' | 'oneOrNone',
   params?: any[]
 }
 
@@ -16,9 +18,15 @@ router.post('/', async (req, res) => {
     params
   } = req.body as Payload
 
-  const result = await db[method ?? 'all'](query, params);
+  try {
+    const result = await db[method ?? 'any'](query, params);
 
-  res.json(result);
+    return res.json(result);
+  } catch (error) {
+    console.error(error);
+    
+    res.status(STATUS.INTERNAL_SERVER_ERROR).json(MESSAGE.GENERIC_SERVER_ERROR);
+  }
 });
 
 export default router;

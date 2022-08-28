@@ -1,29 +1,29 @@
-import { Router} from 'express';
-import axios from 'axios';
-import sql from '../db/db.js';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
-import STATUS from '../utils/status.js';
+// import { Router} from 'express';
+// import axios from 'axios';
+// import sql from '../db/db.js';
+// import jwt from 'jsonwebtoken';
+// import bcrypt from 'bcrypt';
+// import STATUS from '../utils/status.js';
 
-const router = Router();
+// const router = Router();
 
-router.post('/', async (req, res) => {
-  const { username, password } = req.body;
+// router.post('/', async (req, res) => {
+//   const { username, password } = req.body;
 
-  const body = {
-    method: 'one',
-    query: `SELECT username FROM users WHERE username = '${username}'`
-  };
+//   const body = {
+//     method: 'one',
+//     query: `SELECT username FROM users WHERE username = '${username}'`
+//   };
 
-  // check if user exists
-  const { data } = await axios.post(`${process.env.ONLYPANS_DB_URL}/query`, body, {
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  });
+//   // check if user exists
+//   const { data } = await axios.post(`${process.env.ONLYPANS_DB_URL}/query`, body, {
+//     headers: {
+//       'Content-Type': 'application/json'
+//     }
+//   });
 
-  res.json(data);
-});
+//   res.json(data);
+// });
 
 // router.post('/', async (req, res) => {
 //   const { username, password } = req.body;
@@ -77,4 +77,4 @@ router.post('/', async (req, res) => {
 //   });
 // });
 
-export default router;
+// export default router;

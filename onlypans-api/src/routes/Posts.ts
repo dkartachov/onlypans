@@ -1,9 +1,7 @@
 import { Router } from 'express';
-// import sql from '../db/db.js';
 import STATUS from '../utils/Status';
 import MESSAGE from '../utils/Messages';
-// import Post from '../db/models/post.js';
-import Token from '../types/token';
+import Token from '../types/Token';
 
 const router = Router();
 

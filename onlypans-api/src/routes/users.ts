@@ -1,9 +1,10 @@
 import { Router } from 'express';
+import * as PansDb from '../utils/PansDB';
 
 const router = Router();
 
-router.post('/', async (req, res) => {
-  res.json('signout hit');
+router.get('/', async (req, res) => {
+
 });
 
 export default router;

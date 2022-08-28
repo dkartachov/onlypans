@@ -1,17 +1,10 @@
 import { Router } from 'express';
-import Login from './Login';
+import users from './users';
 import Posts from './Posts';
 
-const publicRoutes = Router();
-const secureRoutes = Router();
+const routes = Router();
 
-// public routes - authentication not required
-publicRoutes.use('/login', Login);
+routes.use('/users', users);
+routes.use('/posts', Posts);
 
-// secure routes - authentication required
-secureRoutes.use('/posts', Posts);
-
-export {
-  publicRoutes,
-  secureRoutes
-}
+export default routes;

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getUser, User } from '../utils/OnlypansDb';
+import STATUS from '../../utils/status';
 
 const router = Router();
 
@@ -7,12 +7,10 @@ router.post('/', async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
-    return res.json('Missing username and/or password');
+    return res.status(STATUS.BAD_REQUEST).json('Missing username and/or password');
   }
 
-  const user: User | null = await getUser(username);
-
-  res.json(user);
+  
 });
 
 export default router;
