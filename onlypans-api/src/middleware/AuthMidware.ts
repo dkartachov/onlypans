@@ -15,8 +15,7 @@ export default (req: Request, res: Response, next: NextFunction) => {
   try {
     const decoded = jwt.verify(accessToken, process.env.SECRET ?? '') as Token;
 
-    req.body.auth = {};
-    req.body.auth = decoded;
+    req.body.token = decoded;
   } catch (e) {
     return res.status(STATUS.UNAUTHORIZED).json(MESSAGE.CUSTOM('Unauthorized', 'Invalid access token'));
   }
