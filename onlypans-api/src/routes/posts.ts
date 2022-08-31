@@ -9,7 +9,6 @@ const router = Router();
 
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
-  const token: Token = req.body.token;
   const select = `
     p.post_id AS id,
     p.user_id AS "userId",
