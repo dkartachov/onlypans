@@ -18,7 +18,7 @@ const PostDetail = ({ route, navigation }) => {
     console.log('Updating detailed post...');
 
     // change to pull more data like comments
-    refreshPost(auth.accessToken, post.id)
+    refreshPost(auth.token, post.id)
     .then(res => res.json())
     .then(post => {
       setLiked(post.liked);
@@ -58,7 +58,7 @@ const PostDetail = ({ route, navigation }) => {
 
     let user = {
       userId: auth.userId,
-      accessToken: auth.accessToken
+      accessToken: auth.token
     };
     
     const res = prevLike ? await unlike(user, post.id) : await like(user, post.id);
@@ -91,7 +91,7 @@ const PostDetail = ({ route, navigation }) => {
           <View style={styles.content}>
             <View style={styles.user}>
               <View style={{ marginBottom: 5 }}>
-                <Stanza style={styles.username}>{post.user.username}</Stanza>
+                <Stanza style={styles.username}>{post.username}</Stanza>
               </View>
               <View>
                 <Stanza>{post.content}</Stanza>

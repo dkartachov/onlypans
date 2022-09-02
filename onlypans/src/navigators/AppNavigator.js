@@ -10,18 +10,18 @@ const AppNavigator = () => {
   const { auth, login } = useAuth();
 
   useEffect(() => {
-    AsyncStorage.getItem('accessToken')
-    .then(accessToken => {
-      const decodedToken = accessToken && jwtDecode(accessToken);
+    AsyncStorage.getItem('token')
+    .then(token => {
+      const decodedToken = token && jwtDecode(token);
       const { user, userId } = decodedToken || {};
 
-      login(user, userId, accessToken);
+      login(user, userId, token);
     })
     .catch(error => console.log(error));
   }, []);
 
   return (
-    auth.loading ? <></> : auth.accessToken ? <MainNavigator /> : <AuthNavigator />
+    auth.loading ? <></> : auth.token ? <MainNavigator /> : <AuthNavigator />
   );
 }
 

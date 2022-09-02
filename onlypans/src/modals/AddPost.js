@@ -27,7 +27,7 @@ const AddPost = ({ navigation, route }) => {
   const handleAddPost = async () => {
     const user = {
       userId: auth.userId,
-      accessToken: auth.accessToken
+      accessToken: auth.token
     };
     const body = {
       post: {

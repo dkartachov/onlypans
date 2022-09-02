@@ -20,7 +20,7 @@ const Login = () => {
       return;
     }
 
-    const res = await fetch(`${env.ONLYPANS_API_URL}/api/v1/login`, {
+    const res = await fetch(`${env.AUTH_URL}/v1/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -30,13 +30,13 @@ const Login = () => {
 
     switch (res.status) {
       case 200:
-        const { accessToken } = await res.json();
+        const { token } = await res.json();
 
-        await AsyncStorage.setItem('accessToken', accessToken);
+        await AsyncStorage.setItem('token', token);
 
-        const userId = jwtDecode(accessToken).userId
+        const userId = jwtDecode(token).userId
   
-        login(username, userId, accessToken);
+        login(username, userId, token);
 
         break;
       case 403:

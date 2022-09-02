@@ -25,7 +25,7 @@ const Feed = ({ navigation }) => {
   useEffect(() => {
     console.debug('Fetching latest posts...');
 
-    fetchPosts(auth.accessToken)
+    fetchPosts(auth.token)
     .then(res => res.json())
     .then(posts => {
       setPosts(posts);
@@ -43,7 +43,7 @@ const Feed = ({ navigation }) => {
       
       console.debug('Updating post...');
 
-      refreshPost(auth.accessToken, currentPost)
+      refreshPost(auth.token, currentPost)
       .then(res => res.json())
       .then(post => {
         setPosts(posts.map(p => p.id === post.id ? post : p));
@@ -55,17 +55,17 @@ const Feed = ({ navigation }) => {
   );
 
   const handleOnEndReached = () => {
-    fetchPosts(auth.accessToken, {
-      afterId: oldestPostId
-    })
-    .then(res => res.json())
-    .then(p => {
-      setPosts(() => posts.concat(p));
+    // fetchPosts(auth.token, {
+    //   afterId: oldestPostId
+    // })
+    // .then(res => res.json())
+    // .then(p => {
+    //   setPosts(() => posts.concat(p));
 
-      if (p.length) {
-        setOldestPostId(p[p.length - 1].id);
-      }
-    });
+    //   if (p.length) {
+    //     setOldestPostId(p[p.length - 1].id);
+    //   }
+    // });
   }
 
   const handleAddPost = () => {

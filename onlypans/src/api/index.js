@@ -17,7 +17,7 @@ import env from "../env";
   let query = `limit=${options.limit || 10}`;
   query += options.afterId ? `&afterId=${options.afterId}` : '';
 
-  const url = `${env.ONLYPANS_API_URL}/api/v1/posts${query ? `?${query}` : ''}`;
+  const url = `${env.API_URL}/v1/posts${query ? `?${query}` : ''}`;
 
   const res = await fetch(url, {
     method: 'GET',
@@ -53,7 +53,7 @@ export const fetchOlderPosts = async (accessToken, options = {}) => {
  * @returns Post
  */
 export const refreshPost = async (accessToken, id) => (
-  fetch(`${env.ONLYPANS_API_URL}/api/v1/posts/${id}`, {
+  fetch(`${env.API_URL}/v1/posts/${id}`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${accessToken}`
@@ -70,7 +70,7 @@ export const refreshPost = async (accessToken, id) => (
  * @returns 
  */
 export const like = async (user, id) => (
-  fetch(`${env.ONLYPANS_API_URL}/api/v1/users/${user.userId}/likes`, {
+  fetch(`${env.API_URL}/api/v1/users/${user.userId}/likes`, {
     method: 'POST',
     headers: {
     'Content-Type': 'application/json',
@@ -89,7 +89,7 @@ export const like = async (user, id) => (
  * @returns 
  */
 export const unlike = async (user, id) => (
-  fetch(`${env.ONLYPANS_API_URL}/api/v1/users/${user.userId}/likes/${id}`, {
+  fetch(`${env.API_URL}/api/v1/users/${user.userId}/likes/${id}`, {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${user.accessToken}`
@@ -106,7 +106,7 @@ export const unlike = async (user, id) => (
  * @returns
  */
 export const addPost = async (user, body) => (
-  fetch(`${env.ONLYPANS_API_URL}/api/v1/users/${user.userId}/posts`, {
+  fetch(`${env.API_URL}/api/v1/users/${user.userId}/posts`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

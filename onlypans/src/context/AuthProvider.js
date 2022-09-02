@@ -15,7 +15,7 @@ const authReducer = (prevState, payload) => {
         loading: false,
         user: payload.user,
         userId: payload.userId,
-        accessToken: payload.accessToken
+        token: payload.token
       }
     case ACTION.LOGOUT:
       return {
@@ -23,7 +23,7 @@ const authReducer = (prevState, payload) => {
         loading: false,
         user: null,
         userId: null,
-        accessToken: null
+        token: null
       }
   }
 }
@@ -33,11 +33,11 @@ const AuthProvider = ({ children }) => {
     loading: true,
     user: null,
     userId: null,
-    accessToken: null
+    token: null
   });
 
-  const login = (user, userId, accessToken) => (
-    dispatch({ type: ACTION.LOGIN, user, userId, accessToken })
+  const login = (user, userId, token) => (
+    dispatch({ type: ACTION.LOGIN, user, userId, token })
   )
 
   const logout = () => (

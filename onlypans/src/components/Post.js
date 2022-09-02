@@ -27,7 +27,7 @@ const Post = ({ post, image, navigate }) => {
 
     let user = {
       userId: auth.userId,
-      accessToken: auth.accessToken
+      accessToken: auth.token
     };
     
     const res = prevLike ? await unlike(user, post.id) : await like(user, post.id);
@@ -63,7 +63,7 @@ const Post = ({ post, image, navigate }) => {
         <View style={styles.content}>
           <View style={styles.user}>
             <View style={{ marginBottom: 5 }}>
-              <Stanza style={styles.username}>{post.user.username}</Stanza>
+              <Stanza style={styles.username}>{post.username}</Stanza>
             </View>
             <View>
               <Stanza>{post.content}</Stanza>
