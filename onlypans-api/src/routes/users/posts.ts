@@ -1,69 +1,12 @@
 import { Router } from 'express';
-import Post from '../types/api/Post';
-import User from '../types/api/User';
-import Token from '../types/Token';
-import MESSAGE from '../utils/Messages';
-import * as PansDB from '../utils/PansDB';
-import STATUS from '../utils/Status';
-
-interface Query {
-  limit?: string
-}
-
-const queryDefaults: Query = {
-  limit: '10'
-};
+import Post from '../../types/api/Post';
+import Token from '../../types/Token';
+import { PansDB, STATUS, MESSAGE } from '../../utils';
 
 const router = Router();
 
 router.get('/', async (req, res) => {
-  const query: Query = req.query;
-
-  if (query.limit) {
-    const num = Number(query.limit);
-
-    if (!Number.isInteger(num) || num < 0) {
-      return res.status(STATUS.BAD_REQUEST).json('limit must be a positive integer');
-    }
-  }
-
-  try {
-    const users = await PansDB.Query<User[]>({
-      method: 'any',
-      query: `SELECT user_id AS id, username, email FROM users LIMIT $1`,
-      params: [query.limit || queryDefaults.limit]
-    });
-
-    res.status(STATUS.OK).json(users);
-  } catch (error) {
-    console.log(error);
-
-    res.status(STATUS.INTERNAL_SERVER_ERROR).json(MESSAGE.GENERIC_SERVER_ERROR);
-  }
-});
-
-router.get('/:id', async (req, res) => {
-  try {
-    const user = await PansDB.Query<User>({
-      method: 'oneOrNone',
-      query: 'SELECT user_id AS id, username, email FROM users WHERE user_id = $1',
-      params: [req.params.id]
-    });
-
-    if (Object.keys(user).length === 0) {
-      return res.status(STATUS.NOT_FOUND).json(MESSAGE.GENERIC_NOT_FOUND);
-    }
-
-    res.status(STATUS.OK).json(user);
-  } catch (error) {
-    console.log(error);
-
-    res.status(STATUS.INTERNAL_SERVER_ERROR).json(MESSAGE.GENERIC_SERVER_ERROR);
-  }
-});
-
-router.get('/:id/posts', async (req, res) => {
-  const { id } = req.params;
+  const { userId: id } = req.body;
   const { userId } = req.body.token as Token;
 
   if (userId !== parseInt(id)) {
@@ -102,8 +45,8 @@ router.get('/:id/posts', async (req, res) => {
   }
 });
 
-router.post('/:id/posts', async (req, res) => {
-  const { id } = req.params;
+router.post('/', async (req, res) => {
+  const { userId: id } = req.body;
   const { userId } = req.body.token as Token;
   const { content } = req.body;
 

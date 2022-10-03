@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import UserMidware from '../middleware/UserMidware';
 import users from './users';
 import posts from './posts';
 
